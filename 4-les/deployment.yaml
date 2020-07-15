@@ -1,0 +1,41 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+    Recreate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - image: postgresql:10.13
+        name: Postgresql
+        env:
+        - name: POSTGRES_USER
+          value: testuser
+        - name: POSTGRES_DB
+          value: testdatabase
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: my-secret
+              key: db-pass
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"
+        ports:
+        - containerPort: 5432
+          protocol: TCP
+        volumeMounts:
+        - name: test
+          mountPath: /var/lib/postgresql/data
